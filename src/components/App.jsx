@@ -46,6 +46,7 @@ export function App() {
       return;
     }
     fetchImages(image, currentPage);
+    // eslint-disable-next-line
   }, [image, currentPage]);
 
   const handleLoadMore = () => {

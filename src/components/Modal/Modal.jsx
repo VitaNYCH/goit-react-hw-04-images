@@ -14,6 +14,7 @@ export function Modal({ children, onClose }) {
     return () => {
       window.removeEventListener('keydown', handelKeyDown);
     };
+    // eslint-disable-next-line
   }, []);
 
   const handelBackdropClick = e => {
