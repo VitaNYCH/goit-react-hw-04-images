@@ -5,18 +5,17 @@ import css from './Modal.module.css';
 const modalRoot = document.querySelector('#modal-root');
 
 export function Modal({ children, onClose }) {
-  const handelKeyDown = e => {
-    if (e.code === 'Escape') {
-      onClose();
-    }
-  };
   useEffect(() => {
+    const handelKeyDown = e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+    };
     window.addEventListener('keydown', handelKeyDown);
     return () => {
       window.removeEventListener('keydown', handelKeyDown);
     };
-    // eslint-disable-next-line
-  }, []);
+  }, [onClose]);
 
   const handelBackdropClick = e => {
     if (e.currentTarget === e.target) {

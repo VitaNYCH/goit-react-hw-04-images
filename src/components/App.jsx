@@ -25,28 +25,27 @@ export function App() {
   const [totalPages, setTotalPages] = useState(0);
   const perPage = 12;
 
-  const fetchImages = async image => {
-    await setStatus(STATUS.PENDING);
-    try {
-      const data = await getImages({ image, perPage, currentPage });
-      if (data.hits.length === 0) {
-        throw Error(`No matches found with "${image}"`);
-      }
-      setHits(prevHits => [...prevHits, ...data.hits]);
-      setTotalPages(Math.ceil(data.total / perPage));
-      setStatus(STATUS.RESOLVED);
-    } catch (error) {
-      setError(error.message);
-      setStatus(STATUS.REJECTED);
-    }
-  };
-
   useEffect(() => {
     if (!image) {
       return;
     }
+    const fetchImages = async image => {
+      await setStatus(STATUS.PENDING);
+      try {
+        const data = await getImages({ image, perPage, currentPage });
+        if (data.hits.length === 0) {
+          throw Error(`No matches found with "${image}"`);
+        }
+        setHits(prevHits => [...prevHits, ...data.hits]);
+        setTotalPages(Math.ceil(data.total / perPage));
+        setStatus(STATUS.RESOLVED);
+      } catch (error) {
+        setError(error.message);
+        setStatus(STATUS.REJECTED);
+      }
+    };
+
     fetchImages(image, currentPage);
-    // eslint-disable-next-line
   }, [image, currentPage]);
 
   const handleLoadMore = () => {
