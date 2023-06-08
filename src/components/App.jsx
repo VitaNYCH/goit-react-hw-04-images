@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import css from './App.module.css';
@@ -16,81 +16,73 @@ const STATUS = {
   REJECTED: 'rejected',
 };
 
-export class App extends Component {
-  state = {
-    image: '',
-    hits: [],
-    error: null,
-    status: STATUS.IDLE,
-    currentPage: 1,
-    totalPages: 0,
-    perPage: 12,
-  };
+export function App() {
+  const [image, setImage] = useState('');
+  const [hits, setHits] = useState([]);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState(STATUS.IDLE);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const perPage = 12;
 
-  componentDidUpdate(_, prevState) {
-    const { currentPage } = this.state;
-    const prevImage = prevState.image;
-    const nextImage = this.state.image;
-
-    if (prevImage !== nextImage || prevState.currentPage !== currentPage) {
-      this.fetchImages(nextImage);
-    }
-  }
-
-  fetchImages = async image => {
-    const { perPage, currentPage } = this.state;
-    await this.setState({ status: STATUS.PENDING });
+  const fetchImages = async image => {
+    await setStatus(STATUS.PENDING);
     try {
       const data = await getImages({ image, perPage, currentPage });
       if (data.hits.length === 0) {
-        throw Error(`No matches found with "${this.state.image}"`);
+        throw Error(`No matches found with "${image}"`);
       }
-      this.setState(prevState => ({
-        hits: [...prevState.hits, ...data.hits],
-        status: STATUS.RESOLVED,
-        totalPages: Math.ceil(data.total / perPage),
-      }));
+      setHits(prevHits => [...prevHits, ...data.hits]);
+      setTotalPages(Math.ceil(data.total / perPage));
+      setStatus(STATUS.RESOLVED);
     } catch (error) {
-      this.setState({ error: error.message, status: STATUS.REJECTED });
+      setError(error.message);
+      setStatus(STATUS.REJECTED);
     }
   };
-  handleLoadMore = () => {
-    this.setState(prevState => ({
-      currentPage: prevState.currentPage + 1,
-    }));
+
+  useEffect(() => {
+    if (!image) {
+      return;
+    }
+    fetchImages(image, currentPage);
+  }, [image, currentPage]);
+
+  const handleLoadMore = () => {
+    setCurrentPage(prevCurrentPage => prevCurrentPage + 1);
   };
 
-  handelFormSubmit = image => {
-    this.setState({ image, currentPage: 1, hits: [] });
+  const handelFormSubmit = image => {
+    setImage(image);
+    setCurrentPage(1);
+    setHits([]);
   };
 
-  render() {
-    const { hits, error, status, currentPage, totalPages } = this.state;
-    const showLoadMoreButton = hits.legth !== 0 && currentPage < totalPages;
-    return (
-      <div className={css.App}>
-        <Searchbar onSubmit={this.handelFormSubmit} />
+  const showLoadMoreButton = hits.legth !== 0 && currentPage < totalPages;
 
-        {status === STATUS.IDLE && (
-          <h2 className={css.Request}>Please enter what you looking for</h2>
-        )}
+  return (
+    <div className={css.App}>
+      <Searchbar onSubmit={handelFormSubmit} />
 
-        {status === STATUS.PENDING && <Loader />}
-        {status === STATUS.REJECTED && (
-          <h1 className={css.ErrorTitle}>{error}</h1>
-        )}
-        {hits.length > 0 && <ImageGallery hits={hits} />}
+      {status === STATUS.IDLE && (
+        <h2 className={css.Request}>Please enter what you looking for</h2>
+      )}
 
-        {showLoadMoreButton && (
-          <Button
-            handleLoadMore={this.handleLoadMore}
-            status={status}
-            pendingStatus={STATUS.PENDING}
-            disabled={status === STATUS.PENDING ? true : false}
-          />
-        )}
-        <ToastContainer autoClose={3000} />
-      </div>
-    );
-  }
+      {status === STATUS.PENDING && <Loader />}
+      {status === STATUS.REJECTED && (
+        <h1 className={css.ErrorTitle}>{error}</h1>
+      )}
+      {hits.length > 0 && <ImageGallery hits={hits} />}
+
+      {showLoadMoreButton && (
+        <Button
+          handleLoadMore={handleLoadMore}
+          status={status}
+          pendingStatus={STATUS.PENDING}
+          disabled={status === STATUS.PENDING ? true : false}
+        />
+      )}
+      <ToastContainer autoClose={3000} />
+    </div>
+  );
 }
