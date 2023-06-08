@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { Modal } from 'components/Modal';
 import css from './ImageGalleryItem.module.css';
@@ -25,3 +26,9 @@ export function ImageGalleryItem({ largeImageURL, tags, webformatURL }) {
     </>
   );
 }
+
+ImageGalleryItem.propTypes = {
+  largeImageURL: PropTypes.string.isRequired,
+  tags: PropTypes.string.isRequired,
+  webformatURL: PropTypes.string.isRequired,
+};

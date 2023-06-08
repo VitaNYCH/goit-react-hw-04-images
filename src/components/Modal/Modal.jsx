@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import css from './Modal.module.css';
@@ -29,3 +30,8 @@ export function Modal({ children, onClose }) {
     modalRoot
   );
 }
+
+Modal.propTypes = {
+  children: PropTypes.node,
+  onClose: PropTypes.func,
+};
